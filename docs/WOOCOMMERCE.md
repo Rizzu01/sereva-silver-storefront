@@ -34,7 +34,7 @@ Local catalog snapshots are review data. The source IDs and paths are retained t
 1. After design approval, obtain a **staging copy** and backup. Record assigned shop/cart/checkout/account pages, active theme/child theme, editor, menu locations, attribute taxonomies, tax mode, guest/registration settings, shipping zones, gateway/courier/email integrations and cache exclusions.
 2. Implement the visual layer on staging. Map existing products/categories and verified content; keep URLs and menu taxonomy. Apply no redirect until the redirect map is approved.
 3. Connect native product forms, cart and account flows. Preserve all server nonces, notices, validation and authorization. Keep checkout/account/cart out of full-page caching as required by the installed setup.
-4. Finalize missing images, Sereva business details, returns/FAQ inconsistencies and sizing chart. Check that no theme-demo/localhost/old-domain assets remain.
+4. Finalize missing images, the two flagged zero-price variations, Sereva business details, returns/FAQ inconsistencies and sizing chart. Check that no theme-demo/localhost/old-domain assets remain.
 5. Use gateway **sandbox mode on staging** for both successful and failed purchases; verify shipping eligibility, coupons, tax totals, stock deduction, confirmation, email, order history, tracking and cancellation/refund behaviour where supported.
 6. Deploy theme/content changes through the host workflow. Never overwrite the production customer/order database with an old staging database. Use an order-safe release strategy and preserve production settings/inventory.
 

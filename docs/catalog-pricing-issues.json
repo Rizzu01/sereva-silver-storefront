@@ -1,0 +1,38 @@
+[
+  {
+    "product_id": 71458,
+    "product": "Petal Bloom Beaded Pendant",
+    "path": "/product/petal-bloom-pendant/",
+    "variation_id": 71951,
+    "attributes": [
+      {
+        "name": "Color",
+        "value": "Pink"
+      }
+    ],
+    "captured_price": 0.0,
+    "captured_in_stock": true,
+    "preview_status": "Pricing unavailable; Add to Bag disabled",
+    "required_action": "Merchant must verify the source variation price before WordPress activation"
+  },
+  {
+    "product_id": 71335,
+    "product": "Duet",
+    "path": "/product/duet/",
+    "variation_id": 71995,
+    "attributes": [
+      {
+        "name": "Size",
+        "value": "India 12 / US 6"
+      },
+      {
+        "name": "Color",
+        "value": "Blue"
+      }
+    ],
+    "captured_price": 0.0,
+    "captured_in_stock": true,
+    "preview_status": "Pricing unavailable; Add to Bag disabled",
+    "required_action": "Merchant must verify the source variation price before WordPress activation"
+  }
+]

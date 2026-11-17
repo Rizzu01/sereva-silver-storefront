@@ -96,7 +96,8 @@ function toast(text) {
   toastTimer = setTimeout(() => ($("#toast").hidden = true), 3300);
 }
 function image(p, attrs = "") {
-  return `<img src="${p.image}" alt="${esc(p.name)}" width="720" height="810" loading="lazy" onerror="this.onerror=null;this.src='/assets/photo-pending.svg'" ${attrs}>`;
+  const loading = attrs.includes('fetchpriority="high"') ? "eager" : "lazy";
+  return `<img src="${p.image}" alt="${esc(p.name)}" width="720" height="810" loading="${loading}" onerror="this.onerror=null;this.src='/assets/photo-pending.svg'" ${attrs}>`;
 }
 function categoryName(p) {
   const c = p.categories.find(
@@ -206,6 +207,14 @@ function currentCollection() {
   const c = CATEGORIES.find((c) => c.slug === slug);
   return { title: c?.name || "Uncategorized", kind: "category", slug };
 }
+function collectionStart() {
+  return location.pathname.replace(/\/page(?:\/|=)\d+\/?$/, "") || "/shop/";
+}
+function resetCollectionPage() {
+  const first = collectionStart();
+  if (first !== location.pathname)
+    history.replaceState({}, "", first + location.search + location.hash);
+}
 function filteredProducts() {
   const col = currentCollection(),
     f = state.filter;
@@ -285,7 +294,7 @@ function collection() {
   ]
     .map(
       ([v, n]) =>
-        `<option value="${v}" ${(state.filter.sort || "featured") === v ? "selected" : ""}>${n}</option>`,
+        `<option value="${v}" ${(state.filter.sort || new URLSearchParams(location.search).get("orderby") || "featured") === v ? "selected" : ""}>${n}</option>`,
     )
     .join(
       "",
@@ -295,6 +304,8 @@ function catalogResults(arr) {
   const page = Number(location.pathname.match(/\/page(?:\/|=)(\d+)/)?.[1] || 0);
   const start = page ? (page - 1) * 12 : 0;
   const stop = page ? page * 12 : state.limit;
+  if (arr.length && start >= arr.length)
+    return `<div class="empty-state">${icon("search")}<h2>There’s more to discover.</h2><p>This collection has no pieces on this page. Return to its beginning to explore the available selection.</p><a href="${esc(collectionStart())}" class="button">Back to the collection ${icon("arrow")}</a></div>`;
   const f = state.filter;
   const chips = [
     ...(f.categories || []),
@@ -306,18 +317,48 @@ function catalogResults(arr) {
   return `${chips.length ? `<div class="active-filters">${chips.map((c) => `<button data-clear-filters aria-label="Clear active filters">${esc(c)} ×</button>`).join("")}</div>` : ""}<div class="product-grid">${arr.length ? arr.slice(start, stop).map(productCard).join("") : empty("A different kind of sparkle?", "No pieces match your selection. Clear your filters or try another search.", "search")}</div>${arr.length ? `<div class="load-more"><span>Showing ${Math.min(start + 1, arr.length)}–${Math.min(stop, arr.length)} of ${arr.length} pieces</span>${page ? `<div>${page > 1 ? `<a class="button outline" href="${location.pathname.replace(/\/page(?:\/|=)\d+\/?$/, "")}/page/${page - 1}/">Previous</a>` : ""}${stop < arr.length ? `<a class="button outline" href="${location.pathname.replace(/\/page(?:\/|=)\d+\/?$/, "")}/page/${page + 1}/">Next page</a>` : ""}</div>` : state.limit < arr.length ? '<button class="button outline" data-load-more>Discover more pieces</button>' : ""}</div>` : `<div style="text-align:center"><button class="text-link" data-clear-filters>Clear filters</button></div>`}`;
 }
 function updateResults() {
+  resetCollectionPage();
   state.limit = 24;
   const arr = filteredProducts();
   $("#catalog-results").innerHTML = catalogResults(arr);
   $(".results-count").textContent = `${arr.length} pieces`;
 }
+function productCopy(p) {
+  const parts = p.description
+    .split("•")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const specification =
+    /^(?:material|polish|stone|length|width|size|closure|style|sku|ideal for)\s*:/i;
+  return specification.test(parts[0] || "")
+    ? { desc: "", specs: parts }
+    : { desc: parts.shift() || "", specs: parts };
+}
+function productTrail(p) {
+  const parent = CATEGORIES.find(
+    (c) => p.categories.includes(c.slug) && ["men", "women"].includes(c.slug),
+  );
+  const category = CATEGORIES.find(
+    (c) =>
+      p.categories.includes(c.slug) &&
+      c.slug !== parent?.slug &&
+      (!parent || c.path.startsWith(parent.path)),
+  );
+  return [
+    ["Shop All", "/shop/"],
+    ...(parent ? [[parent.name, parent.path]] : []),
+    ...(category ? [[category.name, category.path]] : []),
+    [p.name],
+  ];
+}
+function availableVariation(v) {
+  return Boolean(v?.stock) && Number.isFinite(v.price) && v.price > 0;
+}
 function productPage(p) {
   activeProduct = p;
   state.qty = 1;
-  const desc = p.description.split("•")[0].trim();
-  const specs = p.description.split("•").slice(1);
-  const parent = p.categories.includes("men") ? "men" : "women";
-  return `${breadcrumbs([[parent === "men" ? "Men" : "Women", `/product-category/${parent}/`], [p.name]])}<div class="bound product-layout"><section class="gallery" aria-label="Product photographs"><button class="gallery-main" data-zoom="${p.id}" aria-label="Zoom image of ${esc(p.name)}">${image(p, 'id="main-product-image" fetchpriority="high"')}<span>${icon("zoom")}</span></button><div class="gallery-thumbs">${[p.image, ...p.gallery.slice(1)].map((src, i) => `<button class="${i === 0 ? "active" : ""}" data-gallery="${esc(src)}" aria-label="View image ${i + 1}"><img src="${esc(src)}" alt="${esc(p.name)} — view ${i + 1}" loading="lazy"></button>`).join("")}</div></section><section class="product-summary"><p class="eyebrow">Sereva · ${esc(categoryName(p))}</p><h1>${esc(p.name)}</h1><p class="detail-price" id="detail-price">${money(p.price)}${p.regular > p.price ? `<del>${money(p.regular)}</del>` : ""}</p><p class="tax-note">Price shown in Indian rupees.</p><p class="stock-line" id="stock-state"><span class="stock-dot"></span>${p.stock ? "In stock" : "Currently out of stock"} · Catalog preview</p><p class="description">${esc(desc || "Explore the detail and quiet beauty of this sterling silver piece.")}</p><form id="product-form" data-id="${p.id}">${p.attributes
+  const { desc, specs } = productCopy(p);
+  return `${breadcrumbs(productTrail(p))}<div class="bound product-layout"><section class="gallery" aria-label="Product photographs"><button class="gallery-main" data-zoom="${p.id}" aria-label="Zoom image of ${esc(p.name)}">${image(p, 'id="main-product-image" fetchpriority="high"')}<span>${icon("zoom")}</span></button><div class="gallery-thumbs">${[p.image, ...p.gallery.slice(1)].map((src, i) => `<button class="${i === 0 ? "active" : ""}" data-gallery="${esc(src)}" aria-label="View image ${i + 1}"><img src="${esc(src)}" alt="${esc(p.name)} — view ${i + 1}" loading="lazy"></button>`).join("")}</div></section><section class="product-summary"><p class="eyebrow">Sereva · ${esc(categoryName(p))}</p><h1>${esc(p.name)}</h1><p class="detail-price" id="detail-price">${money(p.price)}${p.regular > p.price ? `<del>${money(p.regular)}</del>` : ""}</p><p class="tax-note">Price shown in Indian rupees.</p><p class="stock-line" id="stock-state"><span class="stock-dot"></span>${p.stock ? "In stock" : "Currently out of stock"} · Catalog preview</p><p class="description">${esc(desc || "Explore the detail and quiet beauty of this sterling silver piece.")}</p><form id="product-form" data-id="${p.id}">${p.attributes
     .filter((a) => a.variation)
     .map(
       (a, i) =>
@@ -325,7 +366,7 @@ function productPage(p) {
     )
     .join(
       "",
-    )}<div id="variation-message" class="preview-note" ${p.type === "variable" ? "" : "hidden"}>Choose your options to see availability.</div><div class="product-purchase"><div class="quantity"><button type="button" data-product-qty="-1" aria-label="Decrease quantity">−</button><output id="product-qty">1</output><button type="button" data-product-qty="1" aria-label="Increase quantity">+</button></div><button class="button" id="add-to-bag" ${!p.stock || !p.purchasable || p.type === "variable" ? "disabled" : ""}>${p.stock ? "Add to Bag" : "Out of Stock"} ${icon("arrow")}</button></div></form><div class="detail-actions"><button data-wish="${p.id}" aria-pressed="${state.wishlist.includes(p.id)}">${icon("heart")} ${state.wishlist.includes(p.id) ? "Saved to wishlist" : "Save to wishlist"}</button><button data-compare="${p.id}">${icon("compare")}Compare</button></div><div class="detail-accordions"><details open><summary>The details</summary><ul>${specs.length ? specs.map((s) => `<li>${esc(s)}</li>`).join("") : `<li>${esc(p.description || "Product specifications are pending confirmation.")}</li>`}</ul></details><details><summary>Delivery & returns</summary><p>Delivery within India. The published policy allows around 2 business days for dispatch, then 4–5 business days for delivery. Timings depend on location. <a href="/term-and-conditions/">Delivery details</a></p><p>Eligible return requests within 5 days of delivery. Earrings are excluded except for damaged, defective or incorrect items. An uninterrupted unboxing video is required. <a href="/refund-returns/">Read the full policy</a></p></details><details><summary>Care for your silver</summary><p>Keep away from water, perfume and chemicals. Store each piece separately in a dry pouch. Natural tarnishing is a characteristic of silver. <a href="/jewellery-care/">Explore the care guide</a></p></details></div><p class="detail-sku">SKU: ${esc(p.sku || "Pending")} · Product ID: ${p.id}</p></section></div><section class="bound product-review"><div><p class="eyebrow">Your experience, in your words</p><h2>Reviews</h2></div><div><p>${p.reviews ? `${p.reviews} published reviews · Rating ${p.rating}/5. Review text requires the WordPress review feed.` : "No published reviews yet. Be the first to share your experience once customer reviews are connected."}</p></div></section><section class="featured"><div class="section bound"><div class="section-head"><div><p class="eyebrow">A little more to love</p><h2>Better together.</h2></div><a class="text-link" href="/shop/">Explore all ${icon("arrow")}</a></div><div class="product-grid">${PRODUCTS.filter(
+    )}<div id="variation-message" class="preview-note" role="status" aria-live="polite" ${p.type === "variable" ? "" : "hidden"}>Choose your options to see availability.</div><div class="product-purchase"><div class="quantity"><button type="button" data-product-qty="-1" aria-label="Decrease quantity">−</button><output id="product-qty">1</output><button type="button" data-product-qty="1" aria-label="Increase quantity">+</button></div><button class="button" id="add-to-bag" ${!p.stock || !p.purchasable || p.type === "variable" ? "disabled" : ""}>${p.stock ? "Add to Bag" : "Out of Stock"} ${icon("arrow")}</button></div></form><div class="detail-actions"><button data-wish="${p.id}" aria-pressed="${state.wishlist.includes(p.id)}">${icon("heart")} ${state.wishlist.includes(p.id) ? "Saved to wishlist" : "Save to wishlist"}</button><button data-compare="${p.id}">${icon("compare")}Compare</button></div><div class="detail-accordions"><details open><summary>The details</summary><ul>${specs.length ? specs.map((s) => `<li>${esc(s)}</li>`).join("") : `<li>${esc(p.description || "Product specifications are pending confirmation.")}</li>`}</ul></details><details><summary>Delivery & returns</summary><p>Delivery within India. The published policy allows around 2 business days for dispatch, then 4–5 business days for delivery. Timings depend on location. <a href="/term-and-conditions/">Delivery details</a></p><p>Eligible return requests within 5 days of delivery. Earrings are excluded except for damaged, defective or incorrect items. An uninterrupted unboxing video is required. <a href="/refund-returns/">Read the full policy</a></p></details><details><summary>Care for your silver</summary><p>Keep away from water, perfume and chemicals. Store each piece separately in a dry pouch. Natural tarnishing is a characteristic of silver. <a href="/jewellery-care/">Explore the care guide</a></p></details></div><p class="detail-sku">SKU: ${esc(p.sku || "Pending")} · Product ID: ${p.id}</p></section></div><section class="bound product-review"><div><p class="eyebrow">Your experience, in your words</p><h2>Reviews</h2></div><div><p>${p.reviews ? `${p.reviews} published reviews · Rating ${p.rating}/5. Review text requires the WordPress review feed.` : "No published reviews yet. Be the first to share your experience once customer reviews are connected."}</p></div></section><section class="featured"><div class="section bound"><div class="section-head"><div><p class="eyebrow">A little more to love</p><h2>Better together.</h2></div><a class="text-link" href="/shop/">Explore all ${icon("arrow")}</a></div><div class="product-grid">${PRODUCTS.filter(
     (i) =>
       i.id !== p.id &&
       i.categories.some(
@@ -339,7 +380,7 @@ function productPage(p) {
     .map(productCard)
     .join(
       "",
-    )}</div></div></section><div class="mobile-purchase"><div>${money(p.price)}<small>${p.type === "variable" ? "Select your options" : "925 Sterling Silver"}</small></div><button class="button" data-mobile-add ${!p.stock ? "disabled" : ""}>${p.stock ? "Add to Bag" : "Out of stock"} ${icon("arrow")}</button></div>`;
+    )}</div></div></section><div class="mobile-purchase"><div><span id="mobile-price">${money(p.price)}</span><small id="mobile-selection">${p.type === "variable" ? "Select your options" : "925 Sterling Silver"}</small></div><button class="button" data-mobile-add ${!p.stock || !p.purchasable ? "disabled" : ""}>${!p.stock || !p.purchasable ? "Unavailable" : p.type === "variable" ? "Choose options" : "Add to Bag"} ${icon("arrow")}</button></div>`;
 }
 function selectedVariation(p) {
   const selected = [
@@ -358,26 +399,37 @@ function selectedVariation(p) {
   );
 }
 function updateVariation() {
-  const p = activeProduct,
-    v = selectedVariation(p),
-    detail = v ? VARIATIONS[v.id] : null;
-  let text = "Choose your options to see availability.";
-  let enabled = false;
-  if (v) {
-    enabled = Boolean(detail?.stock) && p.stock;
-    text = detail?.stock
-      ? "Your selection is in stock."
-      : "This variation is currently unavailable.";
-    $("#detail-price").textContent = money(detail?.price ?? p.price);
-    if (detail?.image) $("#main-product-image").src = detail.image;
-  } else if (
+  const p = activeProduct;
+  const v = selectedVariation(p);
+  const detail = v ? VARIATIONS[v.id] : null;
+  const complete =
     $$("#product-form input:checked").length ===
-    p.attributes.filter((a) => a.variation).length
-  )
+    p.attributes.filter((a) => a.variation).length;
+  const priced = detail && Number.isFinite(detail.price) && detail.price > 0;
+  const enabled = availableVariation(detail) && p.stock && p.purchasable;
+  let text = "Choose your options to see availability.";
+  if (v)
+    text = !priced
+      ? "Pricing is unavailable for this option. Please choose another."
+      : enabled
+        ? "Your selection is in stock."
+        : "This variation is currently unavailable.";
+  else if (complete)
     text = "This combination is unavailable. Please choose another option.";
+  const displayedPrice =
+    v && !priced ? "Price unavailable" : money(detail?.price ?? p.price);
+  $("#detail-price").textContent = displayedPrice;
+  $("#mobile-price").textContent = displayedPrice;
+  $("#mobile-selection").textContent = v
+    ? v.attributes.map((a) => a.value).join(" · ")
+    : "Select your options";
+  if (detail?.image) $("#main-product-image").src = detail.image;
   $("#variation-message").textContent = text;
   $("#stock-state").innerHTML = `<span class="stock-dot"></span>${text}`;
   $("#add-to-bag").disabled = !enabled;
+  const mobileButton = $("[data-mobile-add]");
+  mobileButton.disabled = !p.stock || !p.purchasable || (complete && !enabled);
+  mobileButton.innerHTML = `${enabled ? "Add to Bag" : complete ? "Unavailable" : "Choose options"} ${icon("arrow")}`;
 }
 function addToBag(p, variation = null) {
   if (!p.stock || !p.purchasable) {
@@ -386,7 +438,7 @@ function addToBag(p, variation = null) {
   }
   if (
     p.type === "variable" &&
-    (!variation || !VARIATIONS[variation.id]?.stock)
+    (!variation || !availableVariation(VARIATIONS[variation.id]))
   ) {
     toast("Please choose an available option.");
     return;
@@ -938,6 +990,7 @@ document.addEventListener("click", (e) => {
     }
   }
   if (target.hasAttribute("data-clear-filters")) {
+    resetCollectionPage();
     state.filter = { sort: state.filter.sort };
     if (drawer.open && currentDrawer === "filters") {
       $("#drawer-body").innerHTML = filtersMarkup("mobile-");
@@ -947,12 +1000,7 @@ document.addEventListener("click", (e) => {
       window.scrollTo(0, y);
     }
   }
-  if (target.hasAttribute("data-apply-filters")) {
-    drawer.close();
-    const y = window.scrollY;
-    render();
-    window.scrollTo(0, y);
-  }
+  if (target.hasAttribute("data-apply-filters")) drawer.close();
   if (target.hasAttribute("data-load-more")) {
     state.limit += 24;
     $("#catalog-results").innerHTML = catalogResults(filteredProducts());
@@ -1093,6 +1141,7 @@ document.addEventListener("submit", (e) => {
 });
 drawer.addEventListener("close", () => {
   if (currentDrawer === "filters") {
+    resetCollectionPage();
     const y = window.scrollY;
     render();
     window.scrollTo(0, y);

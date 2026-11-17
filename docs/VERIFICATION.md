@@ -4,7 +4,7 @@
 
 `npm run check`: syntax of application, catalog, content and variation scripts.
 
-`npm test`: 15 DOM integration/data/route groups using jsdom. These exercise the actual app DOM and events; they do not provide browser layout measurements.
+`npm test`: 16 DOM integration/data/route groups using jsdom. These exercise the actual app DOM and events; they do not provide browser layout measurements.
 
 1. Homepage category/product composition; 304 products; 240 variation records; all primary image paths exist.
 2. Desktop mega-menu toggle and preserved mobile menu reading order.
@@ -19,8 +19,9 @@
 11. Registration preview, dashboard, order list, address/profile editing and logout. No password persisted.
 12. Sign-in preview, safe same-site return path, password-reset message with explicit no-email status.
 13. Contact validation and explicit unsent-message state.
-14. Every one of 304 product routes, 13 nonempty category templates, standard support/policy routes, duplicate aliases, legacy holds, unknown route and out-of-stock CTA.
-15. No JavaScript exceptions throughout these interactions and route assertions.
+14. Pagination/filter recovery, URL sort selection, source taxonomy breadcrumbs, separated product specifications, eager primary photo, synchronized mobile variation price and two unavailable-pricing options.
+15. Every one of 304 product routes, 13 nonempty category templates, standard support/policy routes, duplicate aliases, legacy holds, unknown route and out-of-stock CTA.
+16. No JavaScript exceptions throughout these interactions and route assertions.
 
 ## Not verified / deferred
 

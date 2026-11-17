@@ -54,7 +54,7 @@ Wishlist, bag, comparison and non-personal preview order summaries persist in lo
 - [Machine-readable route inventory](docs/route-inventory.json)
 - [Proposed redirects — none approved or applied](docs/redirect-map.csv)
 - [Design research, tokens and component system](docs/DESIGN.md)
-- [Asset provenance](docs/asset-provenance.csv) and [missing product images](docs/missing-product-images.json)
+- [Asset provenance](docs/asset-provenance.csv), [missing product images](docs/missing-product-images.json), and [source pricing issues](docs/catalog-pricing-issues.json)
 - [WordPress/WooCommerce handover](docs/WOOCOMMERCE.md)
 - [Verification and review checklist](docs/VERIFICATION.md)
 
@@ -66,7 +66,7 @@ npm run check
 npm test
 ```
 
-Node 24.15+ is recommended for the development-only DOM test dependency. No Node dependency is needed to serve the storefront. Syntax checks and 15 interaction/data/route test groups pass. **Browser layout, touch/keyboard navigation and mobile performance remain unverified:** the managed preview service could not open its browser relay. These are explicitly recorded, not marked as passed.
+Node 24.15+ is recommended for the development-only DOM test dependency. No Node dependency is needed to serve the storefront. Syntax checks and 16 interaction/data/route test groups pass. **Browser layout, touch/keyboard navigation and mobile performance remain unverified:** the managed preview service could not open its browser relay. These are explicitly recorded, not marked as passed.
 
 ## Approval boundary
 

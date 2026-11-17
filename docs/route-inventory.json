@@ -34493,7 +34493,7 @@
     "source_http": "not requested",
     "frontend_verification": "Template implemented; route/data assertions pass; browser layout blocked",
     "wordpress_status": "Live inventory/cart/reviews pending WooCommerce",
-    "notes": "ID 71335; variable; in stock"
+    "notes": "ID 71335; variable; in stock; zero-price variation requires merchant verification; preview purchase disabled for affected option"
   },
   {
     "current_url": "https://johe.in/product/eclipse-bangle/",
@@ -35945,7 +35945,7 @@
     "source_http": "not requested",
     "frontend_verification": "Template implemented; route/data assertions pass; browser layout blocked",
     "wordpress_status": "Live inventory/cart/reviews pending WooCommerce",
-    "notes": "ID 71458; variable; in stock"
+    "notes": "ID 71458; variable; in stock; zero-price variation requires merchant verification; preview purchase disabled for affected option"
   },
   {
     "current_url": "https://johe.in/product/petal-bloom/",

@@ -285,6 +285,86 @@ submit("#contact-form");
 assert(!q("#contact-status").hidden);
 assert(q("#contact-status").textContent.includes("no message was sent"));
 pass("Contact validation and honest unsent-message state");
+// Regression checks for discovered collection/product edge cases.
+go("/shop/page/25/?orderby=price-desc");
+assert.equal(q("#sort-products").value, "price-desc");
+change("#price-filter", "1600");
+assert(!/\/page(?:\/|=)/.test(w.location.pathname));
+assert(
+  qa(".product-card").length > 0,
+  "A filter must recover from a later page",
+);
+go("/shop/page/999/");
+assert(
+  q("#main").textContent.includes("This collection has no pieces on this page"),
+);
+const noGender = catalog.products.find(
+  (p) => !p.categories.includes("men") && !p.categories.includes("women"),
+);
+go(noGender.path);
+assert(!q('.breadcrumbs a[href="/product-category/women/"]'));
+assert(!q('.breadcrumbs a[href="/product-category/men/"]'));
+const descriptive = catalog.products.find((p) => p.slug === "onyx-line");
+go(descriptive.path);
+assert(qa(".detail-accordions details:first-child li").length >= 3);
+assert(!q(".description").textContent.includes("Material:"));
+assert.equal(q("#main-product-image").getAttribute("loading"), "eager");
+const chooseVariant = (variant) => {
+  for (const a of variant.attributes) {
+    const input = qa("#product-form input[type=radio]").find(
+      (i) =>
+        i.dataset.attribute.toLowerCase() === a.name.toLowerCase() &&
+        i.value.toLowerCase() === a.value.toLowerCase(),
+    );
+    assert(input);
+    input.checked = true;
+    input.dispatchEvent(new w.Event("change", { bubbles: true }));
+  }
+};
+const varying = catalog.products.find(
+  (p) =>
+    p.stock &&
+    p.variations.some(
+      (v) =>
+        w.SEREVA_VARIATIONS[v.id].stock &&
+        w.SEREVA_VARIATIONS[v.id].price > 0 &&
+        w.SEREVA_VARIATIONS[v.id].price !== p.price,
+    ),
+);
+const pricedVariation = varying.variations.find(
+  (v) =>
+    w.SEREVA_VARIATIONS[v.id].stock &&
+    w.SEREVA_VARIATIONS[v.id].price > 0 &&
+    w.SEREVA_VARIATIONS[v.id].price !== varying.price,
+);
+go(varying.path);
+assert(q("[data-mobile-add]").textContent.includes("Choose options"));
+chooseVariant(pricedVariation);
+assert.equal(q("#mobile-price").textContent, q("#detail-price").textContent);
+assert(!q("[data-mobile-add]").disabled);
+assert(q("[data-mobile-add]").textContent.includes("Add to Bag"));
+for (const p of catalog.products.filter((p) =>
+  p.variations.some((v) => w.SEREVA_VARIATIONS[v.id].price <= 0),
+)) {
+  go(p.path);
+  chooseVariant(p.variations.find((v) => w.SEREVA_VARIATIONS[v.id].price <= 0));
+  assert(q("#add-to-bag").disabled);
+  assert(q("[data-mobile-add]").disabled);
+  assert.equal(q("#mobile-price").textContent, "Price unavailable");
+  assert(
+    q("#variation-message").textContent.includes("Pricing is unavailable"),
+  );
+  const before = w.localStorage.getItem("sereva-v2-bag");
+  submit("#product-form");
+  assert.equal(
+    w.localStorage.getItem("sereva-v2-bag"),
+    before,
+    "Missing price must not create a free bag item",
+  );
+}
+pass(
+  "Pagination recovery, accurate breadcrumbs, product specifications and mobile variation pricing",
+);
 for (const p of catalog.products) {
   go(p.path);
   assert.equal(q("h1").textContent, p.name, "Product route " + p.path);

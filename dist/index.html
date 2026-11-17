@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A fictional sterling silver jewellery storefront concept by Creative Rizz.">
+<title>SEREVA | Sterling Silver Jewellery</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="stylesheet" href="style.css"><script defer src="store.js"></script>
+</head>
+<body>
+<a href="#shop" class="skip">Skip to jewellery</a>
+<div class="announcement">925 Sterling Silver <span aria-hidden="true">✦</span> Shipping across India</div>
+<header class="header">
+  <div class="nav-wrap">
+    <button class="icon-button menu-toggle" data-panel="menu" aria-label="Open menu"><i data-icon="menu"></i></button>
+    <nav class="desktop-nav" aria-label="Main menu">
+      <a href="#">Home</a><a href="#shop" data-edit="Diwali Edit">Diwali Edit</a>
+      <details class="store-menu"><summary>Store</summary><div class="store-links">
+        <a href="#shop" data-edit="New Arrivals">New Arrivals</a><a href="#shop" data-shop="Women">Women</a>
+        <a href="#shop" data-shop="Men">Men</a><a href="#shop" data-shop="All">Shop All</a>
+      </div></details>
+      <button class="nav-link" data-panel="about">About Us</button><button class="nav-link" data-panel="contact">Contact</button>
+    </nav>
+    <a class="wordmark" href="#" aria-label="SEREVA home">SEREVA<span>STERLING SILVER</span></a>
+    <div class="actions">
+      <button class="icon-button" data-panel="search" aria-label="Search jewellery"><i data-icon="search"></i></button>
+      <button class="icon-button account-icon" data-panel="account" aria-label="Customer account"><i data-icon="person"></i></button>
+      <button class="icon-button header-heart" data-panel="wishlist" aria-label="Wishlist"><i data-icon="heart"></i></button>
+      <button class="icon-button bag-button" data-panel="bag" aria-label="Shopping bag"><i data-icon="bag"></i><span id="bag-count" hidden>0</span></button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <img class="hero-image" src="assets/hero.webp" alt="" fetchpriority="high">
+    <div class="hero-shade"></div>
+    <div class="hero-content bound">
+      <p class="eyebrow">THE STERLING SILVER EDIT</p>
+      <h1 id="hero-title">Silver, made<br>to be worn.</h1>
+      <p class="hero-copy">Jewellery for every day, and the days you’ll remember.</p>
+      <div class="hero-actions"><a class="button ivory" href="#shop" data-shop="Women">Shop Women <i data-icon="arrow"></i></a><a class="button outline-light" href="#shop" data-shop="Men">Shop Men <i data-icon="arrow"></i></a></div>
+    </div>
+  </section>
+  <div class="assurances" aria-label="Shopping information">
+    <div><i data-icon="sparkle"></i> 925 Sterling Silver</div><div><i data-icon="truck"></i> Shipping across India</div><button class="nav-link" data-panel="returns"><i data-icon="return"></i> Returns information</button>
+  </div>
+  <section class="section bound" id="categories">
+    <div class="section-heading"><h2>Shop by jewellery</h2><a class="line-link" href="#shop" data-shop="All">View all jewellery <i data-icon="arrow"></i></a></div>
+    <div class="categories" id="category-list"></div>
+  </section>
+  <section class="catalog-section" id="shop">
+    <div class="section bound">
+      <div class="section-heading"><div><p class="eyebrow">THE SEREVA COLLECTION</p><h2>Find your favourites</h2></div></div>
+      <div class="catalog-tools">
+        <div class="tabs" id="audiences" aria-label="Shop by audience"></div>
+        <div class="selects"><label><span class="sr-only">Jewellery type</span><select id="type-filter"><option value="All">All jewellery</option></select></label>
+          <label><span class="sr-only">Sort products</span><select id="sort"><option value="featured">Featured</option><option value="low">Price: Low to high</option><option value="high">Price: High to low</option></select></label></div>
+      </div>
+      <p id="result-info" class="result-info" aria-live="polite"></p><div class="products" id="products"></div>
+      <p class="concept-note">Fictional storefront concept. Photography, products and prices are illustrative.</p>
+    </div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="bound footer-grid">
+    <div><a class="wordmark footer-mark" href="#">SEREVA<span>STERLING SILVER</span></a></div>
+    <div><h2>Shop</h2><a href="#shop" data-shop="Women">Women</a><a href="#shop" data-shop="Men">Men</a><a href="#categories">Collections</a></div>
+    <div><h2>Customer care</h2><button data-panel="tracking">Track an order</button><button data-panel="returns">Returns and exchanges</button><button data-panel="contact">Contact</button></div>
+    <div><h2>Account</h2><button data-panel="account">My account</button><button data-panel="wishlist">Wishlist</button><button data-panel="about">About Us</button></div>
+  </div>
+  <div class="bound footer-end"><span>SEREVA</span><span>Fictional storefront concept by Creative Rizz</span></div>
+</footer>
+<dialog id="panel" aria-labelledby="panel-title"><div class="panel-header"><h2 id="panel-title"></h2><button class="icon-button" id="close-panel" aria-label="Close"><i data-icon="close"></i></button></div><div class="panel-content" id="panel-content"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

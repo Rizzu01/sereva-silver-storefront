@@ -1,0 +1,4 @@
+current_url,proposed_destination,status,reason
+https://johe.in/refund_returns-2/,/refund-returns/,NOT APPROVED - NOT APPLIED,Product-page returns link differs from canonical footer policy
+https://johe.in/refund_returns/,/refund-returns/,NOT APPROVED - NOT APPLIED,Legacy internal returns URL
+https://johe.koyeldesign.comshop/,/shop/,NOT APPROVED - NOT APPLIED,Malformed promotional link in source

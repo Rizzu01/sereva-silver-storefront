@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /
+# Design preview. Remove only after catalog, policies and WooCommerce integration are approved.

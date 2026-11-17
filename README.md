@@ -1,22 +1,73 @@
-# Sereva Silver storefront concept
+# Sereva — a feeling, in silver
 
-An independent fictional brand demo by Creative Rizz. The static site uses HTML, CSS, and JavaScript. All product imagery and sample prices are illustrative.
+A complete **HTML, CSS and vanilla JavaScript storefront preview**, prepared for Vercel review and a later WordPress/WooCommerce implementation. Sereva replaces the original store name in the visible design. The primary brand colours and observed desktop/mobile navigation hierarchy are preserved.
 
-## Run locally
+The catalog snapshot contains **304 products and 240 variations**, with published INR prices, specifications, stock states and product photography captured on **17 November 2026**. This is a design preview: **accounts, checkout, payment and orders are browser simulations**, not live WooCommerce transactions.
 
-Run `python3 -m http.server 8000 --directory dist` from this folder, then open http://localhost:8000. The demo includes responsive menus, collection filters, search, a local wishlist, and a local shopping bag. Account and checkout screens demonstrate the flow without collecting credentials or taking payment.
+## Deploy on Vercel
 
-## WordPress and WooCommerce implementation
+1. Import `Rizzu01/sereva-silver-storefront` and select branch **main**.
+2. Keep **Root Directory** at the repository root. Framework preset: **Other**.
+3. The committed `vercel.json` sets **Output Directory: dist**, skips installation/build, and supplies deep-link fallback. No environment variables or API keys are required.
+4. Deploy, then review `/`, `/shop/`, a product URL, `/cart/`, `/checkout/` and `/my-account/`. A refresh on a product/category path should work.
 
-1. **Start on staging.** Back up the database and files. Identify the active WordPress theme, its editor, current cart and checkout configuration, and payment/shipping plugins. Record a baseline order before changing anything.
-2. **Rebuild the visual layer in the current theme.** Port the layout and design tokens in `dist/style.css`, scoping the CSS to the new storefront sections. Use the Site Editor and WooCommerce templates with block themes. With a classic theme or a builder, use that editor for editable sections and a child theme for code changes. Use approved client artwork and product photography.
-3. **Map the navigation to existing pages.** Keep the current menu labels and hierarchy. Point Store, Women, Men, New Arrivals and seasonal entries to the matching live WooCommerce pages or product categories. Preserve existing URLs when possible. Render real products and prices from the store catalog rather than the demo list in `dist/store.js`.
-4. **Connect shopping to WooCommerce.** Use WooCommerce products, variations, stock and native add-to-cart. Replace the browser-only demo bag and wishlist with the store’s cart and existing wishlist solution where available. Keep the existing cart, checkout, payment and shipping setup until compatibility is verified. Test INR prices, tax rounding and PIN-code shipping with the existing providers.
-5. **Use the native My Account page.** Link the header account icon to the assigned WooCommerce My Account page. Use its existing account page content or the `[woocommerce_my_account]` shortcode. Set registration and guest checkout under WooCommerce → Settings → Accounts & Privacy. Test login, registration, reset email and customer order visibility with test accounts.
-6. **Validate before release.** Test menus on desktop and phone, product variations, add-to-cart, guest checkout, a successful and a failed payment in sandbox mode, and order/dispatch emails. Verify policy, contact and tracking links. Publish theme and content changes using the host’s deployment workflow, preserving production orders and inventory.
+The preview has `noindex` headers and `robots.txt` blocking indexing. Remove those only for an approved production implementation. Vercel hosting is deliberately left to the client, as requested.
 
-### References
+## Local preview
 
-- [WooCommerce store templates](https://woocommerce.com/document/woocommerce-store-editing/templates/)
-- [WooCommerce cart and checkout](https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/)
-- [WooCommerce My Account and page shortcodes](https://woocommerce.com/document/woocommerce-shortcodes/page-shortcodes/)
+```sh
+python3 scripts/serve.py --port 3000
+```
+
+Open `http://localhost:3000`. Use an HTTP server with route fallback; opening the HTML as `file://` does not support the route structure.
+
+## What works in the preview
+
+- Luxury homepage; original hierarchy in a desktop mega menu and expandable mobile menu; category discovery, collections, product/tag archives and preserved URLs.
+- Search suggestions/results, price/category/attribute/finish/availability filtering, sort, load more and legacy pagination paths.
+- All 304 product pages, galleries, zoom, original variation labels, variation-specific price/availability, quantity controls and clear unavailable/out-of-stock states.
+- Browser wishlist, three-product comparison, bag drawer/page, quantity/removal, valid/invalid preview coupons (`SEREVA10`).
+- Checkout validation, sandbox-success/decline UI, local order confirmation and demo order tracking. No gateway or courier is contacted.
+- Account sign-in/registration/reset previews, dashboard, preview orders, address/profile editing and logout. Passwords are discarded; no credential or account is stored.
+- Our Story, Jewellery Care, FAQs, Contact, policy pages, journal/archive layouts and documented holds for legacy/demo pages.
+
+Wishlist, bag, comparison and non-personal preview order summaries persist in localStorage. Account/profile/address values exist only in memory. Contact/checkout address data is not sent or persisted. Use sample details throughout.
+
+## Files
+
+| File | Purpose |
+| --- | --- |
+| `dist/index.html` | Semantic app shell, dialogs and metadata. |
+| `dist/style.css` | Extracted colour tokens, reusable components, responsive styles and reduced-motion rules. |
+| `dist/store.js` | Routing, templates and browser-only interactions. |
+| `dist/catalog.js` | Public catalog snapshot with product/category/tag mapping. |
+| `dist/variations.js` | 240 variation-specific price and stock records. |
+| `dist/content.js` | Sanitized, adapted content snapshot. |
+| `dist/assets/` | Local images, fonts, licences and explicit missing-photo placeholder. |
+| `vercel.json` | Static deployment and route fallback. |
+| `scripts/check.mjs` | Meaningful DOM interaction and catalog/route checks. |
+
+## Audit and handover
+
+- [Source audit, findings and blockers](docs/AUDIT.md)
+- [Page and feature coverage map — 3,382 entries](docs/page-feature-map.csv)
+- [Machine-readable route inventory](docs/route-inventory.json)
+- [Proposed redirects — none approved or applied](docs/redirect-map.csv)
+- [Design research, tokens and component system](docs/DESIGN.md)
+- [Asset provenance](docs/asset-provenance.csv) and [missing product images](docs/missing-product-images.json)
+- [WordPress/WooCommerce handover](docs/WOOCOMMERCE.md)
+- [Verification and review checklist](docs/VERIFICATION.md)
+
+## Checks
+
+```sh
+npm ci
+npm run check
+npm test
+```
+
+Node 24.15+ is recommended for the development-only DOM test dependency. No Node dependency is needed to serve the storefront. Syntax checks and 15 interaction/data/route test groups pass. **Browser layout, touch/keyboard navigation and mobile performance remain unverified:** the managed preview service could not open its browser relay. These are explicitly recorded, not marked as passed.
+
+## Approval boundary
+
+Per the client’s revised instruction, this delivery is the repository for Vercel review. **No staging storefront, live authentication, payment sandbox purchase or WordPress installation is claimed complete.** The later implementation must use native WooCommerce sessions, inventory, accounts, taxes, shipping, gateways, order records and email, preserving existing customer/order data. Policy conflicts, Sereva business/contact details, 16 missing product photos, sizing chart and final photography approval remain listed for that stage.
